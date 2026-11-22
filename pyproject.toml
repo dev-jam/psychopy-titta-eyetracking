@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "psychopy-titta-eyetracking"
+version = "0.1.0"
+description = "PsychoPy Builder plugin for Tobii eye trackers through Titta: calibration, recording, messages, gaze plotting and saving the data"
+authors = ["Bob Rosbag <mail@bobrosbag.nl>"]
+readme = "README.md"
+packages = [
+    {include = "psychopy_titta_eyetracking"},
+]
+include = [
+    {path = "psychopy_titta_eyetracking/components/*/*.svg", format = ["sdist", "wheel"]},
+    {path = "psychopy_titta_eyetracking/components/*/*/*.png", format = ["sdist", "wheel"]},
+]
+license = "GPL-3.0-or-later"
+keywords = ["psychopy", "titta", "tobii", "eye tracking"]
+homepage = "https://github.com/dev-jam/psychopy-titta-eyetracking"
+repository = "https://github.com/dev-jam/psychopy-titta-eyetracking"
+
+[tool.poetry.dependencies]
+python = ">= 3.10"
+titta = ">= 2.2.2"
+pandas = "*"
+h5py = "*"
+pillow = "*"
+
+# Builder components (PsychoPy loads every installed plugin)
+[tool.poetry.plugins."psychopy.experiment.components"]
+TittaInitComponent = "psychopy_titta_eyetracking.components.init:TittaInitComponent"
+TittaCalibrateComponent = "psychopy_titta_eyetracking.components.calibrate:TittaCalibrateComponent"
+TittaStartRecordingComponent = "psychopy_titta_eyetracking.components.start_recording:TittaStartRecordingComponent"
+TittaSendMessageComponent = "psychopy_titta_eyetracking.components.send_message:TittaSendMessageComponent"
+TittaPlotGazeComponent = "psychopy_titta_eyetracking.components.plot_gaze:TittaPlotGazeComponent"
+TittaStopRecordingComponent = "psychopy_titta_eyetracking.components.stop_recording:TittaStopRecordingComponent"
+TittaSaveDataComponent = "psychopy_titta_eyetracking.components.save_data:TittaSaveDataComponent"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
