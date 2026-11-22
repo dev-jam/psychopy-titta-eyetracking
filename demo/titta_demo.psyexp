@@ -58,7 +58,7 @@
         <Param val="" valType="str" updates="None" name="backgroundImg"/>
         <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
         <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
-        <Param val="Simple demo eye tracking experiment for the Titta PsychoPy plugin (psychopy-titta-eyetracking), the same as the demo of the Titta OpenSesame plugin.&amp;#10;&amp;#10;By default it runs in dummy mode. To connect to a Tobii eye tracker, set Dummy mode to No in the 'titta' component (routine 'setup') and select the eye tracker.&amp;#10;&amp;#10;The experiment asks whether to plot the gaze on the stimulus screen after each stimulus. In dummy mode the gaze moves in a circle; with an eye tracker it is the real gaze. Press space to go on. Eye tracking data: data/&lt;participant&gt;_titta_demo_&lt;date&gt;.h5 (and tsv files) next to the PsychoPy data file.&amp;#10;&amp;#10;The pictures and the data are compatible with the demo analysis of Titta: https://github.com/marcus-nystrom/Titta" valType="str" updates="constant" name="desc"/>
+        <Param val="Simple demo eye tracking experiment for the Titta PsychoPy plugin (psychopy-titta-eyetracking), the same as the demo of the Titta OpenSesame plugin.&amp;#10;&amp;#10;By default it runs in dummy mode. To connect to a Tobii eye tracker, set Dummy mode to No in the 'titta' component (routine 'setup') and select the eye tracker.&amp;#10;&amp;#10;The experiment asks whether to plot the gaze on the stimulus screen. The gaze is shown in real time during each stimulus, until you press space. In dummy mode the gaze moves in a circle; with an eye tracker it is the real gaze. To show the gaze to the researcher on a second screen instead (a copy of the stimulus screen with the gaze on top), enable the operator screen in the 'titta' component and 'Plot gaze on operator display' in the plot_gaze components. Eye tracking data: data/&lt;participant&gt;_titta_demo_&lt;date&gt;.h5 (and tsv files) next to the PsychoPy data file.&amp;#10;&amp;#10;The pictures and the data are compatible with the demo analysis of Titta: https://github.com/marcus-nystrom/Titta" valType="str" updates="constant" name="desc"/>
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="" valType="code" updates="None" name="durationEstim"/>
         <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
@@ -123,7 +123,7 @@
         <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
         <Param val="" valType="code" updates="constant" name="stopVal"/>
         <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
-        <Param val="Titta demo&amp;#10;&amp;#10;Plot the gaze on the stimulus screen after each stimulus? (y/n)" valType="str" updates="constant" name="text"/>
+        <Param val="Titta demo&amp;#10;&amp;#10;Plot the gaze on the stimulus screen during the stimuli? (y/n)" valType="str" updates="constant" name="text"/>
         <Param val="from exp settings" valType="str" updates="None" name="units"/>
         <Param val="" valType="code" updates="None" name="validator"/>
         <Param val="" valType="num" updates="constant" name="wrapWidth"/>
@@ -412,6 +412,23 @@
         <Param val="" valType="code" updates="constant" name="stopVal"/>
         <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
       </TittaSendMessageComponent>
+      <TittaPlotGazeComponent name="plot_gaze_block1" plugin="psychopy-titta-eyetracking">
+        <Param val="False" valType="bool" updates="None" name="disableWaitBlanking"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="plot_gaze_block1" valType="code" updates="None" name="name"/>
+        <Param val="Copy every frame" valType="str" updates="None" name="operatorBackground"/>
+        <Param val="False" valType="bool" updates="None" name="operatorDisplay"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="True" valType="bool" updates="None" name="simulateGaze"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="condition" valType="str" updates="None" name="startType"/>
+        <Param val="gaze_response.keys == 'y' and tThisFlip &gt;= 1.0 - frameTolerance" valType="code" updates="None" name="startVal"/>
+        <Param val="True" valType="bool" updates="None" name="stimulusDisplay"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
+      </TittaPlotGazeComponent>
       <KeyboardComponent name="key_resp_block1" plugin="None">
         <Param val="'space'" valType="list" updates="constant" name="allowedKeys"/>
         <Param val="" valType="str" updates="constant" name="correctAns"/>
@@ -431,35 +448,6 @@
         <Param val="False" valType="bool" updates="constant" name="storeCorrect"/>
         <Param val="True" valType="bool" updates="constant" name="syncScreenRefresh"/>
       </KeyboardComponent>
-    </Routine>
-    <Routine name="gaze_block1">
-      <RoutineSettingsComponent name="gaze_block1" plugin="None">
-        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
-        <Param val="" valType="str" updates="None" name="backgroundImg"/>
-        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
-        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
-        <Param val="" valType="str" updates="constant" name="desc"/>
-        <Param val="False" valType="bool" updates="None" name="disabled"/>
-        <Param val="" valType="code" updates="None" name="durationEstim"/>
-        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
-        <Param val="gaze_block1" valType="code" updates="None" name="name"/>
-        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
-        <Param val="gaze_response.keys != 'y'" valType="code" updates="constant" name="skipIf"/>
-        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
-        <Param val="" valType="code" updates="constant" name="stopVal"/>
-        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
-      </RoutineSettingsComponent>
-      <TittaPlotGazeComponent name="plot_gaze_block1" plugin="psychopy-titta-eyetracking">
-        <Param val="False" valType="bool" updates="None" name="disableWaitBlanking"/>
-        <Param val="False" valType="bool" updates="None" name="disabled"/>
-        <Param val="plot_gaze_block1" valType="code" updates="None" name="name"/>
-        <Param val="False" valType="bool" updates="None" name="operatorDisplay"/>
-        <Param val="'space'" valType="list" updates="None" name="responseKeys"/>
-        <Param val="True" valType="bool" updates="None" name="simulateGaze"/>
-        <Param val="True" valType="bool" updates="None" name="stimulusDisplay"/>
-        <Param val="" valType="code" updates="None" name="timeout"/>
-        <Param val="Routine start" valType="str" updates="None" name="when"/>
-      </TittaPlotGazeComponent>
     </Routine>
     <Routine name="trial_block2">
       <RoutineSettingsComponent name="trial_block2" plugin="None">
@@ -562,6 +550,23 @@
         <Param val="" valType="code" updates="constant" name="stopVal"/>
         <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
       </TittaSendMessageComponent>
+      <TittaPlotGazeComponent name="plot_gaze_block2" plugin="psychopy-titta-eyetracking">
+        <Param val="False" valType="bool" updates="None" name="disableWaitBlanking"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="plot_gaze_block2" valType="code" updates="None" name="name"/>
+        <Param val="Copy every frame" valType="str" updates="None" name="operatorBackground"/>
+        <Param val="False" valType="bool" updates="None" name="operatorDisplay"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="True" valType="bool" updates="None" name="simulateGaze"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="condition" valType="str" updates="None" name="startType"/>
+        <Param val="gaze_response.keys == 'y' and tThisFlip &gt;= 1.0 - frameTolerance" valType="code" updates="None" name="startVal"/>
+        <Param val="True" valType="bool" updates="None" name="stimulusDisplay"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
+      </TittaPlotGazeComponent>
       <KeyboardComponent name="key_resp_block2" plugin="None">
         <Param val="'space'" valType="list" updates="constant" name="allowedKeys"/>
         <Param val="" valType="str" updates="constant" name="correctAns"/>
@@ -581,35 +586,6 @@
         <Param val="False" valType="bool" updates="constant" name="storeCorrect"/>
         <Param val="True" valType="bool" updates="constant" name="syncScreenRefresh"/>
       </KeyboardComponent>
-    </Routine>
-    <Routine name="gaze_block2">
-      <RoutineSettingsComponent name="gaze_block2" plugin="None">
-        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
-        <Param val="" valType="str" updates="None" name="backgroundImg"/>
-        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
-        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
-        <Param val="" valType="str" updates="constant" name="desc"/>
-        <Param val="False" valType="bool" updates="None" name="disabled"/>
-        <Param val="" valType="code" updates="None" name="durationEstim"/>
-        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
-        <Param val="gaze_block2" valType="code" updates="None" name="name"/>
-        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
-        <Param val="gaze_response.keys != 'y'" valType="code" updates="constant" name="skipIf"/>
-        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
-        <Param val="" valType="code" updates="constant" name="stopVal"/>
-        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
-      </RoutineSettingsComponent>
-      <TittaPlotGazeComponent name="plot_gaze_block2" plugin="psychopy-titta-eyetracking">
-        <Param val="False" valType="bool" updates="None" name="disableWaitBlanking"/>
-        <Param val="False" valType="bool" updates="None" name="disabled"/>
-        <Param val="plot_gaze_block2" valType="code" updates="None" name="name"/>
-        <Param val="False" valType="bool" updates="None" name="operatorDisplay"/>
-        <Param val="'space'" valType="list" updates="None" name="responseKeys"/>
-        <Param val="True" valType="bool" updates="None" name="simulateGaze"/>
-        <Param val="True" valType="bool" updates="None" name="stimulusDisplay"/>
-        <Param val="" valType="code" updates="None" name="timeout"/>
-        <Param val="Routine start" valType="str" updates="None" name="when"/>
-      </TittaPlotGazeComponent>
     </Routine>
     <Routine name="done">
       <RoutineSettingsComponent name="done" plugin="None">
@@ -711,7 +687,6 @@
       <Param name="random seed" updates="None" val="" valType="code"/>
     </LoopInitiator>
     <Routine name="trial_block1"/>
-    <Routine name="gaze_block1"/>
     <LoopTerminator name="block1"/>
     <LoopInitiator loopType="TrialHandler" name="block2">
       <Param name="Selected rows" updates="None" val="" valType="code"/>
@@ -725,7 +700,6 @@
       <Param name="random seed" updates="None" val="" valType="code"/>
     </LoopInitiator>
     <Routine name="trial_block2"/>
-    <Routine name="gaze_block2"/>
     <LoopTerminator name="block2"/>
     <Routine name="done"/>
   </Flow>

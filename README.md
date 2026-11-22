@@ -31,11 +31,11 @@ The components are in the Builder's component panel under **Titta Eye Tracking**
 | **Titta Calibrate** | Shows Titta's participant setup, calibration and validation screens (bimonocular and on the operator screen when chosen in Titta Init). | Routine start or end |
 | **Titta Start Recording** | Starts the recording of the chosen data (gaze, time sync, eye images, notifications, external signal, positioning). | Routine start or end |
 | **Titta Send Message** | Sends a message to the recording, e.g. to mark the onset of a stimulus: the start message on the screen flip where the component starts, the optional stop message on the flip where it stops. | Like a stimulus: start and stop time |
-| **Titta Plot Gaze** | Shows the gaze position over the current display, on the stimulus display and/or the operator display, until a response key is pressed or the timeout has passed. | Routine start or end |
+| **Titta Plot Gaze** | Shows the gaze in real time while it runs, e.g. during a stimulus: on the operator screen as a copy of the stimulus screen with the gaze on top (for the researcher), and/or on the stimulus screen. | Like a stimulus: start and stop time |
 | **Titta Stop Recording** | Stops the recording. | Routine start or end |
 | **Titta Save Data** | Saves the recording as an HDF5 file next to PsychoPy's data file, and can also export every table to tsv files and the eye images to png files. | Routine start or end |
 
-*Routine start or end*: every component except Titta Init and Titta Send Message has the setting **When**: *Routine start* (before the first frame of the Routine) or *Routine end* (after its last frame). These components have no duration and don't keep a Routine running: a Routine with only Titta components ends right away. Components with the same *When* act in the order of the Routine (top to bottom). When a Routine has a *Skip if* condition (Routine settings) and it is true, the Titta components in it do nothing.
+*Routine start or end*: every component except Titta Init, Titta Send Message and Titta Plot Gaze has the setting **When**: *Routine start* (before the first frame of the Routine) or *Routine end* (after its last frame). These components have no duration and don't keep a Routine running: a Routine with only Titta components ends right away. Components with the same *When* act in the order of the Routine (top to bottom). When a Routine has a *Skip if* condition (Routine settings) and it is true, the Titta components in it do nothing.
 
 
 ## Requirements
@@ -106,7 +106,7 @@ PsychoPy uses pyglet 1.4 on Windows, whose text fails with Python 3.12 and later
     Loop "trials"
         Routine "trial"    fixation + Titta Send Message ("fix_on" / "fix_off"),
                            image + Titta Send Message ($'onset_' + image_file / $'offset_' + image_file),
-                           keyboard
+                           Titta Plot Gaze (same start as the image), keyboard
     Routine "end"          Titta Stop Recording, Titta Save Data, goodbye text
 
 The demo experiment `demo/titta_demo.psyexp` is this experiment, the same as the demo of the OpenSesame plugin (pictures included). It starts in dummy mode; open it in the Builder and run it.
@@ -128,7 +128,13 @@ The **Start message** is sent on the screen flip where the component starts, the
 
 ### Titta Plot Gaze
 
-Plots the gaze (left eye red, right eye blue) over the frame that is on the screen when the component acts, e.g. a stimulus at the end of the previous Routine. **Response keys**: e.g. `'space'` or `'space', 'return'`; empty: any key. **Timeout (s)**: empty is no timeout. The key and the response time go to the data file as `<name>.keys` and `<name>.rt`. When *Enable Escape* is on in the experiment settings, Escape ends the experiment. In dummy mode, **Simulate gaze in dummy mode** draws gaze that moves in a circle.
+Shows the gaze in real time while the component runs, every frame: left eye red, right eye blue. Give it the same start (and stop) as the stimulus, and put it below the stimuli in the Routine; without a stop time it runs until the Routine ends (e.g. a key press of a Keyboard component), as Titta Plot Gaze ran instead of the keyboard response in the OpenSesame demo.
+
+- **Plot gaze on operator display** (on by default; enable the operator screen in Titta Init): the operator screen shows a copy of the stimulus screen with the gaze on top, for the researcher. With a Tobii connected this is the real gaze, live.
+- **Operator display background**: *Copy every frame* (live; each frame of the stimulus screen is read back from the graphics card, which takes time: check the frame timing of your experiment: PsychoPy warns about dropped frames in the log, `t of last frame was ...`), *Copy at start* (one copy, enough for a static stimulus such as a picture, and cheaper), or *None* (gaze on a background of the window colour). The copy is made at the end of each flip of the stimulus screen, so the operator screen is one frame behind.
+- **Force disabling of waitBlanking for gaze plot on operator screen**: only matters when waitBlanking is on for the operator screen in Titta Init; the two screens are flipped one after the other, so waitBlanking on the operator screen can make the stimulus screen miss frames.
+- **Plot gaze on stimulus display**: draws the gaze on the participant's screen, on top of all stimuli (useful for testing and demos).
+- **Simulate gaze in dummy mode**: in dummy mode, gaze that moves in a circle; without it nothing is drawn in dummy mode.
 
 ### Titta Save Data
 
@@ -155,6 +161,8 @@ and the methods of the session, which do the same as the components (with the sa
                           block_until_data_available=True)
     titta.stop_recording()
     titta.save_data(tsv_export=True)
+
+`titta.plot_gaze(...)` shows the gaze over the current screen until a key press (the way the OpenSesame item does it), for Coder scripts; it reads the screen from the front buffer, which some graphics drivers don't support (the background is then black).
 
 Use the session methods rather than `titta.tracker.start_recording()`/`stop_recording()` directly: the session keeps track of whether Titta is recording (`titta.recording`), and the other components check that.
 
@@ -195,7 +203,7 @@ The components do what the items of the OpenSesame plugin do, with these differe
 - Builder has no item order of its own: the components act at the start or the end of their Routine (*When*), Titta Send Message at its start and stop time on the screen flip, Titta Init when the experiment starts.
 - Titta Send Message has an optional stop message (e.g. the offset of a stimulus).
 - The data file is named after PsychoPy's data file (`<participant>_<experiment>_<date>.h5`) instead of `subject-<nr>.h5`.
-- Titta Plot Gaze: the timeout is in seconds (PsychoPy's unit), not in milliseconds; an eye without a valid gaze position is not drawn.
+- Titta Plot Gaze is timed like a stimulus and draws every frame of its Routine (real time during the stimulus), instead of waiting for a key itself; a Keyboard component in the same Routine ends it. On the operator screen it can copy the stimulus screen every frame (moving stimuli) or once. An eye without a valid gaze position is not drawn.
 - Blocking start of the recording has a timeout of 5 s.
 - Dummy mode can be on in pilot mode only.
 - `IS4_Large_Peripheral` (Tobii 4C with Pro upgrade key) is in the list of eye trackers.

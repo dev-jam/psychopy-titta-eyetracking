@@ -47,9 +47,12 @@ README = """Simple demo eye tracking experiment for the Titta PsychoPy plugin \
 By default it runs in dummy mode. To connect to a Tobii eye tracker, set Dummy mode \
 to No in the 'titta' component (routine 'setup') and select the eye tracker.
 
-The experiment asks whether to plot the gaze on the stimulus screen after each \
-stimulus. In dummy mode the gaze moves in a circle; with an eye tracker it is the \
-real gaze. Press space to go on. Eye tracking data: data/<participant>_titta_demo_<date>.h5 \
+The experiment asks whether to plot the gaze on the stimulus screen. The gaze is shown \
+in real time during each stimulus, until you press space. In dummy mode the gaze moves \
+in a circle; with an eye tracker it is the real gaze. To show the gaze to the researcher \
+on a second screen instead (a copy of the stimulus screen with the gaze on top), enable \
+the operator screen in the 'titta' component and 'Plot gaze on operator display' in the \
+plot_gaze components. Eye tracking data: data/<participant>_titta_demo_<date>.h5 \
 (and tsv files) next to the PsychoPy data file.
 
 The pictures and the data are compatible with the demo analysis of Titta: \
@@ -94,8 +97,8 @@ def main():
 
     setup = new_routine(exp, 'setup', 0)
     setup.addComponent(TittaInitComponent(exp, 'setup', name='titta', dummyMode='Yes'))
-    text(setup, 'gaze_question', 'Titta demo\n\nPlot the gaze on the stimulus screen after each '
-         'stimulus? (y/n)', stop='')
+    text(setup, 'gaze_question', 'Titta demo\n\nPlot the gaze on the stimulus screen during the '
+         'stimuli? (y/n)', stop='')
     keyboard(setup, 'gaze_response', "'y','n'")
     setup.settings.params['desc'].val = README
 
@@ -130,16 +133,17 @@ def main():
             exp, trial.name, name=f'stim_message_{block}', startVal=1.0, stopVal='',
             startMessage=f"$'onset_' + {file_name}",
             stopMessage=f"$'offset_' + {file_name}"))
+        # As in the OpenSesame demo: the gaze is shown during the stimulus,
+        # until the key press (when the answer was y)
+        trial.addComponent(TittaPlotGazeComponent(
+            exp, trial.name, name=f'plot_gaze_{block}', startType='condition',
+            startVal="gaze_response.keys == 'y' and tThisFlip >= 1.0 - frameTolerance",
+            stimulusDisplay=True, operatorDisplay=False, simulateGaze=True))
         keyboard(trial, f'key_resp_{block}', "'space'", start=1.0)
-        gaze = new_routine(exp, f'gaze_{block}', position + 1)
-        gaze.addComponent(TittaPlotGazeComponent(
-            exp, gaze.name, name=f'plot_gaze_{block}', stimulusDisplay=True,
-            simulateGaze=True, responseKeys="'space'"))
-        gaze.settings.params['skipIf'].val = "gaze_response.keys != 'y'"
         loop = TrialHandler(exp, name=block, loopType='sequential', nReps=1,
                             conditionsFile=f'{block}.csv')
-        exp.flow.addLoop(loop, startPos=position, endPos=position + 2)
-        position += 4  # two routines, loop start and end
+        exp.flow.addLoop(loop, startPos=position, endPos=position + 1)
+        position += 3  # the routine, loop start and end
 
     done = new_routine(exp, 'done', position)
     done.addComponent(TittaStopRecordingComponent(exp, 'done'))

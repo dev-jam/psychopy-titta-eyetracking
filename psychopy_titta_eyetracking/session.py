@@ -36,7 +36,7 @@ from datetime import datetime
 from pathlib import Path
 
 from psychopy import logging
-from psychopy.constants import NOT_STARTED
+from psychopy.constants import FINISHED, NOT_STARTED, STARTED
 
 from .pyglet_text_fix import fix_pyglet_text
 
@@ -102,6 +102,13 @@ SIMULATION_LEFT_X = -0.02
 SIMULATION_RIGHT_X = 0.12
 SIMULATION_STEPS = 60  # samples per circle
 POLL_INTERVAL = 0.001  # s, between keyboard checks when nothing is drawn
+# autoDraw depths (more negative is drawn later, on top): the copy of the
+# stimulus display for the operator is made after all stimuli, then the
+# gaze dots are drawn
+CAPTURE_DEPTH = -1e9
+GAZE_DEPTH = -2e9
+# What the operator display shows under the gaze (Titta Plot Gaze component)
+OPERATOR_BACKGROUNDS = ('Copy every frame', 'Copy at start', 'None')
 
 # Data that Titta always saves, or saves with the external signal stream;
 # a warning when one of them is missing. All pandas tables in the HDF5
@@ -749,6 +756,182 @@ class TittaSession:
         logging.debug(f'Titta: {message}')
         if self.verbose:
             print(message)
+
+
+class TittaGazePlot:
+    """The object of a Titta Plot Gaze component in a Routine: while it runs,
+    it shows the gaze in real time, every frame, on the stimulus display
+    (dots on top of the stimuli) and/or on the operator display (a copy of
+    the stimulus display with the gaze on top).
+
+    Parameters
+    ----------
+    name : str
+        Name of the component.
+    win : psychopy.visual.Window
+        The stimulus display.
+    stimulus_display, operator_display, simulate_gaze, disable_waitblanking : bool
+        As in `TittaSession.plot_gaze()`.
+    operator_background : str
+        One of `OPERATOR_BACKGROUNDS`: what the operator display shows under
+        the gaze.
+    """
+
+    def __init__(self, name, win, stimulus_display=False, operator_display=True,
+                 simulate_gaze=False, disable_waitblanking=False,
+                 operator_background='Copy every frame'):
+        self.name = name
+        self.win = win
+        self.settings = dict(stimulus_display=stimulus_display,
+                             operator_display=operator_display,
+                             simulate_gaze=simulate_gaze,
+                             disable_waitblanking=disable_waitblanking,
+                             operator_background=operator_background)
+        self.status = NOT_STARTED
+        self.tStart = self.tStop = self.tStartRefresh = self.tStopRefresh = None
+        self.frameNStart = self.frameNStop = None
+        self._stimulus_dots = []
+        self._operator = None  # (window, background image, dots)
+        self._step = 0
+        self._captured = False
+        self._waitblanking_off = False
+        self._running = False
+        self._capture = None
+        self._frame = None
+
+    def start(self):
+        """Checks the settings and prepares the drawing (when the component
+        starts).
+        """
+        from psychopy import visual
+
+        session = get_session()
+        session._check_connected()
+        settings = self.settings
+        self.stimulus_display = _bool(settings['stimulus_display'],
+                                      'Plot gaze on stimulus display')
+        self.operator_display = _bool(settings['operator_display'],
+                                      'Plot gaze on operator display')
+        if self.operator_display and not session.operator_screen:
+            raise TittaError('Plot gaze on operator display selected, but the operator screen '
+                             'is not enabled in the Titta Init component')
+        self.simulate_gaze = _bool(settings['simulate_gaze'], 'Simulate gaze in dummy mode')
+        self.operator_background = _choice(settings['operator_background'],
+                                           OPERATOR_BACKGROUNDS, 'Operator display background')
+        self.session = session
+        self._step = 0
+        self._captured = False
+        if not self._stimulus_dots and self.stimulus_display:
+            self._stimulus_dots = _gaze_dots(self.win, self.win)
+        if self._operator is None and self.operator_display:
+            window = session.operator_window
+            background = visual.ImageStim(window, image=None, units='norm', size=(2, 2))
+            self._operator = (window, background, _gaze_dots(window, self.win))
+        self._frame = None
+        if self.operator_display and self.operator_background != 'None':
+            if self._capture is None:
+                self._capture = _FrameCapture(self.win, self._store_frame)
+            self._capture.autoDraw = True
+        # Only needed when waitBlanking is enabled on the operator screen
+        self._waitblanking_off = self.operator_display and session.operator_waitblanking \
+            and _bool(settings['disable_waitblanking'], 'Disable waitBlanking')
+        if self._waitblanking_off:
+            self._operator[0].waitBlanking = False
+        self._running = True
+        self.status = STARTED
+
+    def update(self):
+        """Draws the newest gaze sample (every frame while the component
+        runs).
+        """
+        if not self._running:
+            return
+        session = self.session
+        if session.dummy_mode and not self.simulate_gaze:
+            gaze = None
+        else:
+            self._step += 1
+            with session._titta_errors('read the gaze buffer'):
+                gaze = session._gaze(self._step)
+        for dot, pos in zip(self._stimulus_dots, gaze or (None, None)):
+            # depth: on top of all stimuli, drawn by the flip of the Routine
+            dot.autoDraw = pos is not None
+            if pos is not None:
+                dot.pos = pos
+        if self._operator is not None:
+            self._update_operator(gaze)
+
+    def stop(self):
+        """Stops drawing (when the component stops or the Routine ends)."""
+        # PsychoPy's stop test sets the status before this call
+        if not self._running:
+            return
+        self._running = False
+        for dot in self._stimulus_dots:
+            dot.autoDraw = False
+        if self._capture is not None:
+            self._capture.autoDraw = False
+        if self._waitblanking_off:
+            self._operator[0].waitBlanking = True
+        self.status = FINISHED
+
+    def _store_frame(self, image):
+        # Called by the flip of the stimulus display, with the frame it shows
+        self._frame = image
+        if self.operator_background == 'Copy at start':
+            self._capture.autoDraw = False
+
+    def _update_operator(self, gaze):
+        window, background, dots = self._operator
+        if self._frame is not None:
+            # The frame of the previous flip of the stimulus display
+            background.image = self._frame
+            self._frame = None
+            self._captured = True
+        if self._captured:
+            background.draw()
+        for dot, pos in zip(dots, gaze or (None, None)):
+            if pos is not None:
+                dot.pos = pos
+                dot.draw()
+        window.flip()
+        # Drawing of the Routine goes on in the stimulus display
+        self.win._setCurrent()
+
+
+def _FrameCapture(win, callback):
+    """An invisible autoDraw stimulus, drawn after all stimuli in the flip of
+    the stimulus display: it reads the frame from the back buffer and passes
+    it to `callback` (the front buffer can't be read reliably after the
+    flip, and the flip clears the back buffer before callOnFlip functions
+    run). Made here: psychopy.visual loads OpenGL.
+    """
+    from psychopy.visual.basevisual import MinimalStim
+
+    class FrameCapture(MinimalStim):
+        def __init__(self):
+            self.win = win
+            self.depth = CAPTURE_DEPTH
+            super().__init__(name='titta_frame_capture', autoLog=False)
+
+        def draw(self, win=None):
+            # _getFrame() is private PsychoPy API
+            callback(self.win._getFrame(buffer='back'))
+
+    return FrameCapture()
+
+
+def _gaze_dots(window, stimulus_window):
+    """A red (left eye) and a blue (right eye) dot, round on the stimulus
+    display (norm units), drawn on top of everything.
+    """
+    from psychopy import visual
+
+    aspect_ratio = stimulus_window.size[0] / stimulus_window.size[1]
+    return [visual.Circle(window, radius=(DOT_RADIUS, aspect_ratio * DOT_RADIUS),
+                          units='norm', opacity=0.5, lineColor=color, fillColor=color,
+                          depth=GAZE_DEPTH, autoLog=False)
+            for color in ('red', 'blue')]
 
 
 class TittaMessage:

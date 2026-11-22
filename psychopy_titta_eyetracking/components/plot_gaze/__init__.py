@@ -26,66 +26,89 @@ from pathlib import Path
 
 from psychopy.experiment.components import Param, _translate
 
-from .._base import SESSION, TittaActionComponent, icon_file
+from .._base import MODULE, TittaComponent, icon_file
+from ...session import OPERATOR_BACKGROUNDS
 
 
-class TittaPlotGazeComponent(TittaActionComponent):
-    """Shows the gaze position over the current display (the last flipped
-    frame), on the stimulus display and/or the operator display, until a
-    response key is pressed or the timeout has passed. The key and the
-    response time go to the data file as `<name>.keys` and `<name>.rt`.
+class TittaPlotGazeComponent(TittaComponent):
+    """Shows the gaze in real time while the component runs, e.g. during a
+    stimulus: on the operator display as a copy of the stimulus display with
+    the gaze on top (for the researcher), and/or on the stimulus display.
+    Left eye red, right eye blue. Put it below the stimuli in the Routine
+    and give it the same start and stop as the stimulus; without a stop it
+    runs until the end of the Routine (e.g. a key press of a Keyboard
+    component).
     """
 
     iconFile = icon_file(Path(__file__).parent, 'titta_plot_gaze')
     iconSVG = Path(__file__).parent / 'TittaPlotGazeComponent.svg'
-    tooltip = _translate('Titta Plot Gaze: show the gaze position until a key press')
+    tooltip = _translate('Titta Plot Gaze: show the gaze in real time')
 
-    def __init__(self, exp, parentName, name='titta_plot_gaze', when=None,
-                 stimulusDisplay=False, operatorDisplay=False, simulateGaze=False,
-                 disableWaitBlanking=False, responseKeys='', timeout=''):
-        super().__init__(exp, parentName, name=name, when=when)
-        self._param_bool('stimulusDisplay', stimulusDisplay, 'Plot gaze on stimulus display',
-                         'Draw the gaze on the display of the participant')
+    def __init__(self, exp, parentName, name='titta_plot_gaze',
+                 startType='time (s)', startVal=0.0,
+                 stopType='duration (s)', stopVal='',
+                 startEstim='', durationEstim='',
+                 operatorDisplay=True, operatorBackground=OPERATOR_BACKGROUNDS[0],
+                 stimulusDisplay=False, simulateGaze=False,
+                 disableWaitBlanking=False):
+        super().__init__(exp, parentName, name=name,
+                         startType=startType, startVal=startVal,
+                         stopType=stopType, stopVal=stopVal,
+                         startEstim=startEstim, durationEstim=durationEstim,
+                         syncScreenRefresh=True)
         self._param_bool('operatorDisplay', operatorDisplay,
                          'Plot gaze on operator display',
-                         'Draw the gaze on the operator screen (enable it in Titta Init)')
-        self._param_bool('simulateGaze', simulateGaze, 'Simulate gaze in dummy mode',
-                         'In dummy mode, draw gaze that moves in a circle')
+                         'Show a copy of the stimulus display with the gaze on the operator '
+                         'screen (enable it in Titta Init)')
+        self.params['operatorBackground'] = Param(
+            operatorBackground, valType='str', inputType='choice', categ='Basic',
+            allowedVals=list(OPERATOR_BACKGROUNDS),
+            hint=_translate('Under the gaze on the operator display: a copy of the stimulus '
+                            'display, made every frame (live, but reading the screen takes '
+                            'time: check the frame timing) or once at the start of the '
+                            'component (for a static stimulus), or nothing'),
+            label=_translate('Operator display background'))
+        self._depends('operatorDisplay', 'operatorBackground')
         self._param_bool('disableWaitBlanking', disableWaitBlanking,
                          'Force disabling of waitBlanking for gaze plot on operator screen',
                          'Switch waitBlanking off on the operator screen while plotting')
         self._depends('operatorDisplay', 'disableWaitBlanking')
-        self.params['responseKeys'] = Param(
-            responseKeys, valType='list', inputType='single', categ='Basic',
-            hint=_translate("Keys that end the plot, e.g. 'space', 'return'; empty: any key"),
-            label=_translate('Response keys'))
-        self.params['timeout'] = Param(
-            timeout, valType='code', inputType='single', categ='Basic',
-            hint=_translate('Time in seconds after which the plot ends; empty: no timeout'),
-            label=_translate('Timeout (s, empty is infinite)'))
-        self.order += ['stimulusDisplay', 'operatorDisplay', 'simulateGaze',
-                       'disableWaitBlanking', 'responseKeys', 'timeout']
+        self._param_bool('stimulusDisplay', stimulusDisplay, 'Plot gaze on stimulus display',
+                         'Draw the gaze on the display of the participant, on top of the '
+                         'stimuli')
+        self._param_bool('simulateGaze', simulateGaze, 'Simulate gaze in dummy mode',
+                         'In dummy mode, draw gaze that moves in a circle')
+        self.order += ['operatorDisplay', 'operatorBackground', 'disableWaitBlanking',
+                       'stimulusDisplay', 'simulateGaze']
 
-    def _write_action(self, buff):
+    def writeInitCode(self, buff):
         params = self.params
-        name = params['name']
-        escape = bool(self.exp.settings.params['Enable Escape'].val)
-        code = (
-            f"# Titta: plot gaze until a response key or the timeout\n"
-            f"_titta_key, _titta_rt = {SESSION}.plot_gaze(\n"
+        buff.writeIndentedLines(
+            f"{params['name']} = {MODULE}.TittaGazePlot(\n"
+            f"    name='{params['name']}', win=win,\n"
             f"    stimulus_display={params['stimulusDisplay']},\n"
             f"    operator_display={params['operatorDisplay']},\n"
             f"    simulate_gaze={params['simulateGaze']},\n"
             f"    disable_waitblanking={params['disableWaitBlanking']},\n"
-            f"    response_keys={params['responseKeys']},\n"
-            f"    timeout={self._code_or_none(params['timeout'])},\n"
-            f"    escape_key={escape})\n"
-            f"thisExp.addData('{name}.keys', _titta_key)\n"
-            f"thisExp.addData('{name}.rt', _titta_rt)\n"
-        )
-        if escape:
-            code += (
-                "if _titta_key == 'escape':\n"
-                "    thisExp.status = FINISHED\n"
-            )
-        buff.writeIndentedLines(code)
+            f"    operator_background={params['operatorBackground']})\n")
+
+    def writeFrameCode(self, buff):
+        name = self.params['name']
+        buff.writeIndentedLines(f"\n# *{name}* updates\n")
+        indented = self.writeStartTestCode(buff)
+        if indented:
+            buff.writeIndentedLines(f"{name}.start()\n")
+            buff.setIndentLevel(-indented, relative=True)
+        indented = self.writeStopTestCode(buff)
+        if indented:
+            buff.writeIndentedLines(f"{name}.stop()\n")
+            buff.setIndentLevel(-indented, relative=True)
+        buff.writeIndentedLines(
+            f"# Titta: draw the newest gaze sample\n"
+            f"{name}.update()\n")
+
+    def writeRoutineEndCode(self, buff):
+        buff.writeIndentedLines(
+            f"# Titta: stop plotting the gaze of {self.params['name']}\n"
+            f"{self.params['name']}.stop()\n")
+        super().writeRoutineEndCode(buff)

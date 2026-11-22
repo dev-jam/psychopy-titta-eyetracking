@@ -58,7 +58,8 @@ def test_registered():
         'calibrationManual': True, 'headBoxManual': True, 'headBoxCenterX': 0,
         'headBoxCenterY': -30, 'headBoxCenterZ': 650, 'operatorScreen': True},
      'TittaSendMessageComponent': {'stopVal': 2.0, 'startMessage': "$'onset_' + image"},
-     'TittaPlotGazeComponent': {'responseKeys': "'space', 'return'", 'timeout': 5}},
+     'TittaPlotGazeComponent': {'stopVal': 3.0, 'stimulusDisplay': True,
+                                'operatorBackground': 'Copy at start'}},
 ])
 def test_code(tmp_path, params, when, skip_if):
     exp = build(params, when, skip_if)
@@ -70,13 +71,14 @@ def test_code(tmp_path, params, when, skip_if):
     ast.parse(script)
     assert 'import psychopy_titta_eyetracking' in script
     assert 'runAtExit.append(titta.close)' in script
+    assert 'titta_plot_gaze.update()' in script
     if params:
         assert 'dummy_mode=PILOTING' in script
         assert 'sampling_rate=300' in script
         assert 'head_box_center=[0, -30, 650]' in script
         assert 'operator_resolution=(1920, 1080)' in script
-        assert "response_keys=['space', 'return']" in script
-        assert 'timeout=5' in script
+        assert "operator_background='Copy at start'" in script
+        assert 'titta_plot_gaze.stop()' in script
         assert "start_message = 'onset_' + image" in script
         assert 'titta_message.on_stop(win)' in script
     else:

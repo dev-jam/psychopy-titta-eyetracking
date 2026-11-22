@@ -20,13 +20,13 @@ except PackageNotFoundError:
     # Running from a source folder that is not installed
     __version__ = 'unknown'
 
-__all__ = ['TittaSession', 'TittaError', 'TittaMessage', 'get_session',
-           '__version__']
+__all__ = ['TittaSession', 'TittaError', 'TittaMessage', 'TittaGazePlot',
+           'get_session', '__version__']
 
 
 def __getattr__(name):
     # Import session.py only when it is used (PEP 562)
-    if name in ('TittaSession', 'TittaError', 'TittaMessage', 'get_session'):
+    if name in ('TittaSession', 'TittaError', 'TittaMessage', 'TittaGazePlot', 'get_session'):
         from . import session
         return getattr(session, name)
     raise AttributeError(f'module {__name__!r} has no attribute {name!r}')

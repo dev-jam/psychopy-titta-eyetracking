@@ -263,3 +263,74 @@ def test_key_list(keys, expected):
 def test_key_list_invalid():
     with pytest.raises(TittaError):
         titta_session._key_list([1])
+
+
+class FakeStim:
+    def __init__(self):
+        self.autoDraw = False
+        self.pos = None
+        self.drawn = 0
+        self.image = None
+
+    def draw(self):
+        self.drawn += 1
+
+
+class FakeOperatorWindow:
+    def __init__(self):
+        self.waitBlanking = True
+        self.flips = 0
+
+    def flip(self):
+        self.flips += 1
+
+
+def test_gaze_plot_needs_operator_screen(tmp_path):
+    s = make_session(tmp_path)
+    connect_fake(s)
+    plot = titta_session.TittaGazePlot('plot', FakeWindow(), operator_display=True)
+    with pytest.raises(TittaError, match='operator screen is not enabled'):
+        plot.start()
+
+
+def test_gaze_plot_live(tmp_path):
+    s = make_session(tmp_path, operator_screen=True, operator_waitblanking=True)
+    connect_fake(s)
+    s.dummy_mode = True  # simulated gaze, no buffer needed
+    window = FakeOperatorWindow()
+    s.operator_window = window
+    plot = titta_session.TittaGazePlot('plot', FakeWindow(), stimulus_display=True,
+                                       operator_display=True, simulate_gaze=True,
+                                       disable_waitblanking=True)
+    # No OpenGL here: fake stimuli and frame capture
+    plot._stimulus_dots = [FakeStim(), FakeStim()]
+    background, dots = FakeStim(), [FakeStim(), FakeStim()]
+    plot._operator = (window, background, dots)
+    plot._capture = FakeStim()
+    plot.win._setCurrent = lambda: None
+    plot.start()
+    assert window.waitBlanking is False and plot._capture.autoDraw
+    plot.update()  # nothing captured yet: no background
+    assert background.drawn == 0 and all(d.autoDraw for d in plot._stimulus_dots)
+    plot._store_frame('frame 1')  # what the flip of the stimulus display does
+    plot.update()
+    assert background.image == 'frame 1' and background.drawn == 1
+    assert dots[0].drawn == 2 and window.flips == 2
+    plot.stop()
+    plot.stop()  # twice is fine (stop time and end of the Routine)
+    assert window.waitBlanking is True
+    assert not plot._capture.autoDraw and not any(d.autoDraw for d in plot._stimulus_dots)
+    plot.update()  # after the stop: nothing happens
+    assert window.flips == 2
+
+
+def test_gaze_plot_dummy_without_simulation(tmp_path):
+    s = make_session(tmp_path)
+    connect_fake(s)
+    s.dummy_mode = True
+    plot = titta_session.TittaGazePlot('plot', FakeWindow(), stimulus_display=True,
+                                       operator_display=False)
+    plot._stimulus_dots = [FakeStim(), FakeStim()]
+    plot.start()
+    plot.update()
+    assert not any(d.autoDraw for d in plot._stimulus_dots)
