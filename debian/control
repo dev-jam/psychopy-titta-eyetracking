@@ -1,0 +1,29 @@
+Source: psychopy-titta-eyetracking
+Section: python
+Priority: optional
+Maintainer: Bob Rosbag <debian@bobrosbag.nl>
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-python3,
+               pybuild-plugin-pyproject,
+               python3-all,
+               python3-poetry-core,
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
+Homepage: https://github.com/dev-jam/psychopy-titta-eyetracking
+Vcs-Browser: https://github.com/dev-jam/psychopy-titta-eyetracking/tree/debian/latest
+Vcs-Git: https://github.com/dev-jam/psychopy-titta-eyetracking.git -b debian/latest
+
+Package: python3-psychopy-titta-eyetracking
+Architecture: all
+# PsychoPy is not in Debian yet: add it to Depends when it is.
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3-h5py,
+         python3-pandas,
+         python3-pil,
+         python3-titta (>= 2.2.2),
+Description: PsychoPy plugin for Tobii eye trackers through Titta
+ This plugin for the PsychoPy experiment builder calibrates and
+ records Tobii eye trackers through Titta, with components for
+ calibration, recording, messages, gaze plotting and saving the
+ data.
