@@ -31,7 +31,7 @@ The components are in the Builder's component panel under **Titta Eye Tracking**
 | **Titta Calibrate** | Shows Titta's participant setup, calibration and validation screens (bimonocular and on the operator screen when chosen in Titta Init). | Routine start or end |
 | **Titta Start Recording** | Starts the recording of the chosen data (gaze, time sync, eye images, notifications, external signal, positioning). | Routine start or end |
 | **Titta Send Message** | Sends a message to the recording, e.g. to mark the onset of a stimulus: the start message on the screen flip where the component starts, the optional stop message on the flip where it stops. | Like a stimulus: start and stop time |
-| **Titta Plot Gaze** | Shows the gaze in real time while it runs, e.g. during a stimulus: on the operator screen as a copy of the stimulus screen with the gaze on top (for the researcher), and/or on the stimulus screen. | Like a stimulus: start and stop time |
+| **Titta Plot Gaze** | Shows the gaze in real time while it runs, e.g. during a stimulus: on the stimulus screen (by default), and/or on the operator screen as a copy of the stimulus screen with the gaze on top (for the researcher). | Like a stimulus: start and stop time |
 | **Titta Stop Recording** | Stops the recording. | Routine start or end |
 | **Titta Save Data** | Saves the recording as an HDF5 file next to PsychoPy's data file, and can also export every table to tsv files and the eye images to png files. | Routine start or end |
 
@@ -130,10 +130,10 @@ The **Start message** is sent on the screen flip where the component starts, the
 
 Shows the gaze in real time while the component runs, every frame: left eye red, right eye blue. Give it the same start (and stop) as the stimulus, and put it below the stimuli in the Routine; without a stop time it runs until the Routine ends (e.g. a key press of a Keyboard component), as Titta Plot Gaze ran instead of the keyboard response in the OpenSesame demo.
 
-- **Plot gaze on operator display** (on by default; enable the operator screen in Titta Init): the operator screen shows a copy of the stimulus screen with the gaze on top, for the researcher. With a Tobii connected this is the real gaze, live.
+- **Plot gaze on stimulus display** (on by default: one screen): draws the gaze on the participant's screen, on top of all stimuli.
+- **Plot gaze on operator display** (off by default; enable the operator screen in Titta Init, and switch off the stimulus display to keep the gaze from the participant): the operator screen shows a copy of the stimulus screen with the gaze on top, for the researcher. With a Tobii connected this is the real gaze, live.
 - **Operator display background**: *Copy every frame* (live; each frame of the stimulus screen is read back from the graphics card, which takes time: check the frame timing of your experiment: PsychoPy warns about dropped frames in the log, `t of last frame was ...`), *Copy at start* (one copy, enough for a static stimulus such as a picture, and cheaper), or *None* (gaze on a background of the window colour). The copy is made at the end of each flip of the stimulus screen, so the operator screen is one frame behind.
 - **Force disabling of waitBlanking for gaze plot on operator screen**: only matters when waitBlanking is on for the operator screen in Titta Init; the two screens are flipped one after the other, so waitBlanking on the operator screen can make the stimulus screen miss frames.
-- **Plot gaze on stimulus display**: draws the gaze on the participant's screen, on top of all stimuli (useful for testing and demos).
 - **Simulate gaze in dummy mode**: in dummy mode, gaze that moves in a circle; without it nothing is drawn in dummy mode.
 
 ### Titta Save Data

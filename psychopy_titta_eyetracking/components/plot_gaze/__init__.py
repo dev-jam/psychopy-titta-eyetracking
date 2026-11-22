@@ -32,8 +32,9 @@ from ...session import OPERATOR_BACKGROUNDS
 
 class TittaPlotGazeComponent(TittaComponent):
     """Shows the gaze in real time while the component runs, e.g. during a
-    stimulus: on the operator display as a copy of the stimulus display with
-    the gaze on top (for the researcher), and/or on the stimulus display.
+    stimulus: on the stimulus display (the default, one screen), and/or on
+    the operator display as a copy of the stimulus display with the gaze on
+    top (for the researcher on a second screen).
     Left eye red, right eye blue. Put it below the stimuli in the Routine
     and give it the same start and stop as the stimulus; without a stop it
     runs until the end of the Routine (e.g. a key press of a Keyboard
@@ -48,8 +49,8 @@ class TittaPlotGazeComponent(TittaComponent):
                  startType='time (s)', startVal=0.0,
                  stopType='duration (s)', stopVal='',
                  startEstim='', durationEstim='',
-                 operatorDisplay=True, operatorBackground=OPERATOR_BACKGROUNDS[0],
-                 stimulusDisplay=False, simulateGaze=False,
+                 stimulusDisplay=True, operatorDisplay=False,
+                 operatorBackground=OPERATOR_BACKGROUNDS[0], simulateGaze=False,
                  disableWaitBlanking=False):
         super().__init__(exp, parentName, name=name,
                          startType=startType, startVal=startVal,
@@ -78,8 +79,8 @@ class TittaPlotGazeComponent(TittaComponent):
                          'stimuli')
         self._param_bool('simulateGaze', simulateGaze, 'Simulate gaze in dummy mode',
                          'In dummy mode, draw gaze that moves in a circle')
-        self.order += ['operatorDisplay', 'operatorBackground', 'disableWaitBlanking',
-                       'stimulusDisplay', 'simulateGaze']
+        self.order += ['stimulusDisplay', 'operatorDisplay', 'operatorBackground',
+                       'disableWaitBlanking', 'simulateGaze']
 
     def writeInitCode(self, buff):
         params = self.params

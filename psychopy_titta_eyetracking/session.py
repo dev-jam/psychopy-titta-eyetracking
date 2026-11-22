@@ -777,7 +777,7 @@ class TittaGazePlot:
         the gaze.
     """
 
-    def __init__(self, name, win, stimulus_display=False, operator_display=True,
+    def __init__(self, name, win, stimulus_display=True, operator_display=False,
                  simulate_gaze=False, disable_waitblanking=False,
                  operator_background='Copy every frame'):
         self.name = name
