@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-22
+
 - changed: Titta Plot Gaze is a timed component that shows the gaze in real time while it runs (e.g. during a stimulus), on the operator screen as a copy of the stimulus screen with the gaze on top (new setting *Operator display background*: copy every frame, at start, or none) and/or on the stimulus screen; it no longer waits for a key itself (settings *Response keys*, *Timeout* and *When* removed). Plot gaze on operator display is on by default
 - demo: the gaze is shown during the stimulus, as in the OpenSesame demo (no separate gaze Routine)
 
