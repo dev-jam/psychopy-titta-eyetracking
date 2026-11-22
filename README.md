@@ -55,7 +55,7 @@ The plugin is a Python package. Install it in the Python environment that runs P
 1. In the Builder, open **Tools > Plugin/packages manager...** and go to the **Packages** tab.
 2. Either
    - click **Install from file** and choose the wheel file (`psychopy_titta_eyetracking-<version>-py3-none-any.whl`), or
-   - once the plugin is on PyPI, type in the pip console of that tab (PsychoPy adds `python -m pip` itself):
+   - type in the pip console of that tab (PsychoPy adds `python -m pip` itself; the plugin is on [PyPI](https://pypi.org/project/psychopy-titta-eyetracking/)):
 
          install psychopy-titta-eyetracking --user
 

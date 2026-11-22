@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+- readme: the plugin is on PyPI (link), no "once the plugin is on PyPI"
+
 ## [0.2.1] - 2026-11-22
 
 - changed: Titta Plot Gaze shows the gaze on the stimulus screen by default (one screen); the operator display is off by default
