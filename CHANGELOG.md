@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-22
+
+- changed: Titta Plot Gaze shows the gaze on the stimulus screen by default (one screen); the operator display is off by default
+- changelog: links to the versions
+
 ## [0.2.0] - 2026-11-22
 
 - changed: Titta Plot Gaze is a timed component that shows the gaze in real time while it runs (e.g. during a stimulus), on the operator screen as a copy of the stimulus screen with the gaze on top (new setting *Operator display background*: copy every frame, at start, or none) and/or on the stimulus screen; it no longer waits for a key itself (settings *Response keys*, *Timeout* and *When* removed). Plot gaze on operator display is on by default
@@ -18,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `TittaSession` for Code components and Coder scripts
 - demo experiment `demo/titta_demo.psyexp` (the demo of the OpenSesame plugin)
 
-[Unreleased]: https://github.com/dev-jam/psychopy-titta-eyetracking/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/dev-jam/psychopy-titta-eyetracking/compare/0.2.1...HEAD
+[0.2.1]: https://github.com/dev-jam/psychopy-titta-eyetracking/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/dev-jam/psychopy-titta-eyetracking/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/dev-jam/psychopy-titta-eyetracking/releases/tag/0.1.0
