@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 - readme: the plugin is on PyPI (link), no "once the plugin is on PyPI"
+- changed: demo: no tsv export (the data is in the .h5 file; Titta Save Data still has the setting, off by default)
 
 ## [0.2.1] - 2026-11-22
 

@@ -58,7 +58,7 @@
         <Param val="" valType="str" updates="None" name="backgroundImg"/>
         <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
         <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
-        <Param val="Simple demo eye tracking experiment for the Titta PsychoPy plugin (psychopy-titta-eyetracking), the same as the demo of the Titta OpenSesame plugin.&amp;#10;&amp;#10;By default it runs in dummy mode. To connect to a Tobii eye tracker, set Dummy mode to No in the 'titta' component (routine 'setup') and select the eye tracker.&amp;#10;&amp;#10;The experiment asks whether to plot the gaze on the stimulus screen. The gaze is shown in real time during each stimulus, until you press space. In dummy mode the gaze moves in a circle; with an eye tracker it is the real gaze. To show the gaze to the researcher on a second screen instead (a copy of the stimulus screen with the gaze on top), enable the operator screen in the 'titta' component and 'Plot gaze on operator display' in the plot_gaze components. Eye tracking data: data/&lt;participant&gt;_titta_demo_&lt;date&gt;.h5 (and tsv files) next to the PsychoPy data file.&amp;#10;&amp;#10;The pictures and the data are compatible with the demo analysis of Titta: https://github.com/marcus-nystrom/Titta" valType="str" updates="constant" name="desc"/>
+        <Param val="Simple demo eye tracking experiment for the Titta PsychoPy plugin (psychopy-titta-eyetracking), the same as the demo of the Titta OpenSesame plugin.&amp;#10;&amp;#10;By default it runs in dummy mode. To connect to a Tobii eye tracker, set Dummy mode to No in the 'titta' component (routine 'setup') and select the eye tracker.&amp;#10;&amp;#10;The experiment asks whether to plot the gaze on the stimulus screen. The gaze is shown in real time during each stimulus, until you press space. In dummy mode the gaze moves in a circle; with an eye tracker it is the real gaze. To show the gaze to the researcher on a second screen instead (a copy of the stimulus screen with the gaze on top), enable the operator screen in the 'titta' component and 'Plot gaze on operator display' in the plot_gaze components. Eye tracking data: data/&lt;participant&gt;_titta_demo_&lt;date&gt;.h5 next to the PsychoPy data file.&amp;#10;&amp;#10;The pictures and the data are compatible with the demo analysis of Titta: https://github.com/marcus-nystrom/Titta" valType="str" updates="constant" name="desc"/>
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="" valType="code" updates="None" name="durationEstim"/>
         <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
@@ -619,7 +619,7 @@
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="titta_save_data" valType="code" updates="None" name="name"/>
         <Param val="False" valType="bool" updates="None" name="pngExport"/>
-        <Param val="True" valType="bool" updates="None" name="tsvExport"/>
+        <Param val="False" valType="bool" updates="None" name="tsvExport"/>
         <Param val="Routine start" valType="str" updates="None" name="when"/>
       </TittaSaveDataComponent>
       <TextComponent name="done_text" plugin="None">

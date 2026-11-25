@@ -53,7 +53,7 @@ in a circle; with an eye tracker it is the real gaze. To show the gaze to the re
 on a second screen instead (a copy of the stimulus screen with the gaze on top), enable \
 the operator screen in the 'titta' component and 'Plot gaze on operator display' in the \
 plot_gaze components. Eye tracking data: data/<participant>_titta_demo_<date>.h5 \
-(and tsv files) next to the PsychoPy data file.
+next to the PsychoPy data file.
 
 The pictures and the data are compatible with the demo analysis of Titta: \
 https://github.com/marcus-nystrom/Titta"""
@@ -147,7 +147,7 @@ def main():
 
     done = new_routine(exp, 'done', position)
     done.addComponent(TittaStopRecordingComponent(exp, 'done'))
-    done.addComponent(TittaSaveDataComponent(exp, 'done', tsvExport=True))
+    done.addComponent(TittaSaveDataComponent(exp, 'done'))
     text(done, 'done_text', 'Done! Press space to end the experiment', stop='')
     keyboard(done, 'done_response', "'space'")
 
