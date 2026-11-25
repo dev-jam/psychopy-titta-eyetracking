@@ -40,7 +40,7 @@ The components are in the Builder's component panel under **Titta Eye Tracking**
 
 ## Requirements
 
-- PsychoPy 2024.2 or newer (tested: 2024.2.4 with Python 3.10 and 2026.2.5 with Python 3.12). Only the PsychoPy (Python) target; the components are not available for PsychoJS/online experiments.
+- PsychoPy 2024.2 or newer (tested: 2024.2.4 with Python 3.10 and 2026.2.5 with Python 3.12 on Linux, and the standalone PsychoPy 2026.2.4 on Windows with a Tobii Pro Spectrum; see [Tested](#tested)). Only the PsychoPy (Python) target; the components are not available for PsychoJS/online experiments.
 - Titta 2.2.2 or newer (installed with the plugin), with TittaPy (installed with Titta).
 - A Tobii eye tracker supported by Titta, e.g. Tobii Pro Spectrum, Fusion, Nano, Spark, X3-120 (see Titta's README). Make sure it works in the [Tobii Pro Eye Tracker Manager](https://www.tobii.com/products/software/applications-and-developer-kits/tobii-pro-eye-tracker-manager) first. Without an eye tracker, use dummy mode.
 - PsychoPy itself is not installed with the plugin (it is not declared as a dependency, so pip can't change the PsychoPy installation).
@@ -68,6 +68,10 @@ Without the Builder, the same with the Python of the standalone PsychoPy, from a
 or, for the wheel file:
 
     python -m pip install C:\path\to\psychopy_titta_eyetracking-<version>-py3-none-any.whl
+
+### PsychoPy Studio
+
+Not possible yet: the plugin manager of PsychoPy Studio only offers the plugins registered in PsychoPy's plugin index; it has no install from a file. Use the standalone PsychoPy (above).
 
 ### PsychoPy installed with pip
 
@@ -138,7 +142,7 @@ Shows the gaze in real time while the component runs, every frame: left eye red,
 
 ### Titta Save Data
 
-Saves `<data file>.h5` (`<data file>_1.h5`, ... when that file exists). **Additionally export to tsv files** writes every table of the HDF5 file to `<data file>_<table>.tsv` (gaze, msg, time_sync, external_signal, notification, calibration_history, log, eye_metadata, as far as recorded). **Additionally export eye images to png files** writes `<data file>_eye_image/<k>.png` (image `<k>` belongs to row `<k>` of `<data file>_eye_metadata.tsv`; eye images are only in the file when they were recorded; an existing folder is never written into, the new folder then gets the date and time). A failed export is a warning in the log and doesn't end the experiment; the data stays in the `.h5` file. The path of the file (without extension) goes to the data file as `<name>.file`. In dummy mode no data is saved.
+Saves `<data file>.h5` (`<data file>_1.h5`, ... when that file exists). **Additionally export to tsv files** (off by default) writes every table of the HDF5 file to `<data file>_<table>.tsv` (gaze, msg, time_sync, external_signal, notification, calibration_history, log, eye_metadata, as far as recorded). **Additionally export eye images to png files** writes `<data file>_eye_image/<k>.png` (image `<k>` belongs to row `<k>` of `<data file>_eye_metadata.tsv`; eye images are only in the file when they were recorded; an existing folder is never written into, the new folder then gets the date and time). A failed export is a warning in the log and doesn't end the experiment; the data stays in the `.h5` file. The path of the file (without extension) goes to the data file as `<name>.file`. In dummy mode no data is saved.
 
 Read the data with pandas, as in Titta's `read_me.py`:
 
@@ -160,7 +164,7 @@ and the methods of the session, which do the same as the components (with the sa
                           external_signal=True, positioning=True,
                           block_until_data_available=True)
     titta.stop_recording()
-    titta.save_data(tsv_export=True)
+    titta.save_data()
 
 `titta.plot_gaze(...)` shows the gaze over the current screen until a key press (the way the OpenSesame item does it), for Coder scripts; it reads the screen from the front buffer, which some graphics drivers don't support (the background is then black).
 
@@ -181,7 +185,7 @@ The same session works in a Coder script:
     titta.send_message('fix on')
     ...
     titta.stop_recording()
-    titta.save_data(tsv_export=True)
+    titta.save_data()
     titta.close()
     win.close()
 
@@ -218,7 +222,12 @@ The components do what the items of the OpenSesame plugin do, with these differe
       python tests/run_experiment.py demo/titta_demo.psyexp --answer y
 
   `run_experiment.py` compiles an experiment and runs it with scripted key presses (e.g. in dummy mode).
-- Not tested so far: a real Tobii eye tracker (connection, calibration screens, real gaze, eye images, notifications), an operator screen on a second monitor, the Builder GUI itself (only the code it generates), PsychoPy Studio, Windows and macOS.
+- Not tested so far: an operator screen on a second monitor, eye images, notifications, the 5 s timeout of a blocking start, PsychoPy Studio (the plugin can't be installed there yet) and macOS.
+
+### Tested
+
+- **Tobii Pro Spectrum, Windows, standalone PsychoPy 2026.2.4, Builder GUI** (the demo experiment, one screen): the calibration works, and Titta Plot Gaze shows the real gaze in real time on the stimulus screen. The recorded data works in Titta's demo analysis.
+- **Linux, PsychoPy 2024.2.4 and 2026.2.5, dummy mode**: the tests above and the demo with scripted keys (`run_experiment.py`).
 
 
 ## License
